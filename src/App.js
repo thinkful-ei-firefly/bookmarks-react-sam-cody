@@ -1,9 +1,11 @@
-import React, { Component } from 'react';
-import AddBookmark from './AddBookmark/AddBookmark';
-import BookmarkList from './BookmarkList/BookmarkList';
-import Nav from './Nav/Nav';
-import config from './config';
-import './App.css';
+import React, { Component } from 'react'
+import AddBookmark from './AddBookmark/AddBookmark'
+import BookmarkList from './BookmarkList/BookmarkList'
+import EditBookmark from './EditBookmark/EditBookmark'
+import Nav from './Nav/Nav'
+import config from './config'
+import './App.css'
+import { Route } from 'react-router-dom'
 
 const bookmarks = [
   // {
@@ -27,30 +29,31 @@ const bookmarks = [
   //   rating: '4',
   //   desc: 'brings together the world\'s largest community of developers.'
   // }
-];
+]
 
 class App extends Component {
   state = {
-    page: 'list',
     bookmarks,
-    error: null,
-  };
-
-  changePage = (page) => {
-    this.setState({ page })
+    error: null
   }
 
   setBookmarks = bookmarks => {
     this.setState({
       bookmarks,
       error: null,
-      page: 'list',
+      page: 'list'
     })
   }
 
   addBookmark = bookmark => {
     this.setState({
-      bookmarks: [ ...this.state.bookmarks, bookmark ],
+      bookmarks: [...this.state.bookmarks, bookmark]
+    })
+  }
+
+  updateBookmark = bookmark => {
+    this.setState({
+      bookmarks: [...this.state.bookmarks, bookmark]
     })
   }
 
@@ -59,7 +62,7 @@ class App extends Component {
       method: 'GET',
       headers: {
         'content-type': 'application/json',
-        'Authorization': `Bearer ${config.API_KEY}`
+        Authorization: `Bearer ${config.API_KEY}`
       }
     })
       .then(res => {
@@ -73,27 +76,34 @@ class App extends Component {
   }
 
   render() {
-    const { page, bookmarks } = this.state
+    const { bookmarks } = this.state
+
     return (
-      <main className='App'>
+      <main className="App">
         <h1>Bookmarks!</h1>
         <Nav clickPage={this.changePage} />
-        <div className='content' aria-live='polite'>
-          {page === 'add' && (
-            <AddBookmark
-              onAddBookmark={this.addBookmark}
-              onClickCancel={() => this.changePage('list')}
+          <div className="content" aria-live="polite">
+            <Route
+              path="/add"
+              render={() => (
+                <AddBookmark
+                  onAddBookmark={this.addBookmark}
+                  onClickCancel={() => this.changePage('list')}
+                />
+              )}
             />
-          )}
-          {page === 'list' && (
-            <BookmarkList
-              bookmarks={bookmarks}
+            <Route
+              path="/list"
+              render={() => <BookmarkList bookmarks={bookmarks} />}
             />
-          )}
-        </div>
+            <Route
+            path="/edit/:id"
+            render={() => <EditBookmark
+            onEditBookmark={this.editBookmark}/>}/>
+          </div>
       </main>
-    );
+    )
   }
 }
 
-export default App;
+export default App
