@@ -1,6 +1,7 @@
 import React, { Component } from  'react';
 import config from '../config'
 import './AddBookmark.css';
+import { Link } from 'react-router-dom'
 
 const Required = () => (
   <span className='AddBookmark__required'>*</span>
@@ -58,7 +59,6 @@ class AddBookmark extends Component {
 
   render() {
     const { error } = this.state
-    const { onClickCancel } = this.props
     return (
       <section className='AddBookmark'>
         <h2>Create a bookmark</h2>
@@ -123,10 +123,11 @@ class AddBookmark extends Component {
             />
           </div>
           <div className='AddBookmark__buttons'>
-            <button type='button' onClick={onClickCancel}>
-              Cancel
-            </button>
-            {' '}
+            <Link to='/list'>
+              <button type='button'>
+                Cancel
+              </button>
+            </Link>
             <button type='submit'>
               Save
             </button>

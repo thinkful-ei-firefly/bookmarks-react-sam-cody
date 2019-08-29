@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { withRouter, Link } from 'react-router-dom'
 import config from '../config'
 import './EditBookmark.css'
 
@@ -10,23 +11,48 @@ class AddBookmark extends Component {
   }
 
   state = {
-    error: null
+    error: null,
+    bookmark: {}
+  }
+
+  componentDidMount() {
+    fetch(config.API_ENDPOINT+'/'+this.props.match.params.id, {
+      method: 'GET',
+      headers: {
+        'content-type': 'application/json',
+        Authorization: `Bearer ${config.API_KEY}`
+      }
+    })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(res.status)
+        }
+        return res.json()
+      })
+      .then(data => 
+        this.setState({
+        bookmark: data
+        })
+      )
+      .catch(error => this.setState({ error }))
   }
 
   handleSubmit = e => {
     e.preventDefault()
     // get the form fields from the event
     const { title, url, description, rating } = e.target
-    const bookmark = {
-      title: title.value,
-      url: url.value,
-      description: description.value,
-      rating: rating.value
-    }
+    const newBookmark = {}
+
+
+    if (title.value) {newBookmark.title=title.value};
+    if (url.value) {newBookmark.url = url.value};
+    if (description.value) {newBookmark.description = description.value};
+    if (rating.value) {newBookmark.rating = rating.value};
+
     this.setState({ error: null })
-    fetch(config.API_ENDPOINT, {
-      method: 'POST',
-      body: JSON.stringify(bookmark),
+    fetch(config.API_ENDPOINT+'/'+this.props.match.params.id, {
+      method: 'PATCH',
+      body: JSON.stringify(newBookmark),
       headers: {
         'content-type': 'application/json',
         authorization: `bearer ${config.API_KEY}`
@@ -40,15 +66,13 @@ class AddBookmark extends Component {
             throw error
           })
         }
-        return res.json()
+        return res.status
       })
-      .then(data => {
-        title.value = ''
-        url.value = ''
-        description.value = ''
-        rating.value = ''
-        this.props.onAddBookmark(data)
+      .then(() => {
+        const data = Object.assign(this.state.bookmark, newBookmark)
+        this.props.onEditBookmark(data)
       })
+      .then(this.props.history.push('/list'))
       .catch(error => {
         this.setState({ error })
       })
@@ -59,7 +83,7 @@ class AddBookmark extends Component {
     const { onClickCancel } = this.props
     return (
       <section className="AddBookmark">
-        <h2>Create a bookmark</h2>
+        <h2>Edit bookmark {this.state.bookmark.id}</h2>
         <form className="AddBookmark__form" onSubmit={this.handleSubmit}>
           <div className="AddBookmark__error" role="alert">
             {error && <p>{error.message}</p>}
@@ -68,29 +92,29 @@ class AddBookmark extends Component {
             <label htmlFor="title">
               Title 
             </label>
-            <input
+            <input placeholder={this.state.bookmark.title}
               type="text"
               name="title"
               id="title"
           
-              required
+          
             />
           </div>
           <div>
             <label htmlFor="url">
               URL 
             </label>
-            <input
+            <input placeholder={this.state.bookmark.url}
               type="url"
               name="url"
               id="url"
               
-              required
+              
             />
           </div>
           <div>
-            <label htmlFor="description">Description</label>
-            <textarea name="description" id="description" />
+            <label htmlFor="description" >Description</label>
+            <textarea name="description" id="description" placeholder={this.state.bookmark.description}/>
           </div>
           <div>
             <label htmlFor="rating">
@@ -100,16 +124,17 @@ class AddBookmark extends Component {
               type="number"
               name="rating"
               id="rating"
-              defaultValue="1"
+              defaultValue={this.state.bookmark.rating}
               min="1"
               max="5"
-              required
             />
           </div>
           <div className="AddBookmark__buttons">
-            <button type="button" onClick={onClickCancel}>
-              Cancel
-            </button>{' '}
+            <Link to='/list'>
+              <button type="button" onClick={onClickCancel}>
+                Cancel
+              </button>
+            </ Link>
             <button type="submit">Save</button>
           </div>
         </form>
@@ -118,4 +143,4 @@ class AddBookmark extends Component {
   }
 }
 
-export default AddBookmark
+export default withRouter(AddBookmark)

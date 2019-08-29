@@ -51,9 +51,12 @@ class App extends Component {
     })
   }
 
-  updateBookmark = bookmark => {
+  editBookmark = newBookmark => {
+    const filteredBookmarks = this.state.bookmarks.filter(bookmark => {
+      return bookmark.id !== newBookmark.id
+    })
     this.setState({
-      bookmarks: [...this.state.bookmarks, bookmark]
+      bookmarks: [...filteredBookmarks, newBookmark]
     })
   }
 
@@ -81,14 +84,13 @@ class App extends Component {
     return (
       <main className="App">
         <h1>Bookmarks!</h1>
-        <Nav clickPage={this.changePage} />
+        <Nav />
           <div className="content" aria-live="polite">
             <Route
               path="/add"
               render={() => (
                 <AddBookmark
                   onAddBookmark={this.addBookmark}
-                  onClickCancel={() => this.changePage('list')}
                 />
               )}
             />
